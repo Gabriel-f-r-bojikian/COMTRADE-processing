@@ -62,5 +62,8 @@ The following technologies were used for the completion of this application:
 # Author and Acknowledgements
 This project was done from scratch by me, Gabriel Fernandes, with several lines of code borrowed from the lectures given by Eduardo Lorenzetti Pellini (elpellini@usp.br), Full Professor of the Energy and Automation department of the Polytechnic School of Engineering of the University of São Paulo.
 
+The banner image credit goes to [Vishnu Mohanan](https://unsplash.com/@vishnumaiea).
+The image source can be found in this [link](https://unsplash.com/photos/yQpAaMsQzYE).
+
 My contact methods are:
 [![Github Badge](https://img.shields.io/badge/-Gabriel-181717?style=flat-square&logo=github&logoColor=white&link=https://github.com/Gabriel-f-r-bojikian)](https://github.com/Gabriel-f-r-bojikian) [![Linkedin Badge](https://img.shields.io/badge/-Gabriel-blue?style=flat-square&logo=Linkedin&logoColor=white&link=https://www.linkedin.com/in/gabriel-fernandes-rosa-bojikian-688b84164/)](https://www.linkedin.com/in/gabriel-fernandes-rosa-bojikian-688b84164/) [![Gmail Badge](https://img.shields.io/badge/-gabriel.bojikian.dev@gmail.com-c14438?style=flat-square&logo=Gmail&logoColor=white&link=mailto:gabriel.bojikian.dev@gmail.com)](mailto:gabriel.bojikian.dev@gmail.com)
