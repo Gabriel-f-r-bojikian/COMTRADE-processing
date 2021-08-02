@@ -1,9 +1,6 @@
-# Ignore all text files
-*.txt
-
-# Ignore the files to be read
-*.cfg
+# Ignore COMTRADE files
 *.csv
+*.cfg
 *.dat
 *.pdf
 
