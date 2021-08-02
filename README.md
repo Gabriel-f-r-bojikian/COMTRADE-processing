@@ -35,7 +35,7 @@ This project is a __work in progress__.
 # Features
 - [x] File reading
 - [x] Signal pre-processing
-- [ ] Internal protection
+- [x] Internal protection
 - [ ] Analog low-pass filtering
 - [ ] ADC digitalization
 - [ ] Digital signal processing with FFT

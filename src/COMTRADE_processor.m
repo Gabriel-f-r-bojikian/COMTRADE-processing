@@ -52,6 +52,12 @@ FMI = 3.0/15; % A/V
 VANs_cond = VANs * FMV;
 VBNs_cond = VBNs * FMV;
 VCNs_cond = VCNs * FMV;
+
+VIALs_cond = IALs * FMI;
+VIBLs_cond = IBLs * FMI;
+VICLs_cond = ICLs * FMI;
+
+
 % Plotting the A phase current after conditioning
 figure;
 plot(ta, VBNs, ta, VBNs_cond); 
@@ -62,12 +68,54 @@ xlabel('Time [s]');
 ylabel('Voltage [V]');
 
 % Generate an analog signal that will be processed by the lowpass filter
-VIBLs_cond = IBLs * FMI;
 % Plotting the A phase current after conditioning
 figure;
 plot(ta, IBLs, ta, VIBLs_cond); 
 grid;
 legend('VIBLs_cond', 'VIBLs_fil');
+title('Current voltages inside the IED before and after FMI');
+xlabel('Time [s]');
+ylabel('Voltage [V]');
+
+
+% Step 3 - Clamping the voltages internal to the IED
+max_ADC_voltage = 3.3;
+
+VANs_lim= VANs_cond;
+VANs_lim(VANs_lim>max_ADC_voltage)= max_ADC_voltage;
+VANs_lim(VANs_lim<-max_ADC_voltage)= -max_ADC_voltage;
+VBNs_lim= VBNs_cond;
+VBNs_lim(VBNs_lim>max_ADC_voltage)= max_ADC_voltage;
+VBNs_lim(VBNs_lim<-max_ADC_voltage)= -max_ADC_voltage;
+VCNs_lim= VCNs_cond;
+VCNs_lim(VCNs_lim>max_ADC_voltage)= max_ADC_voltage;
+VCNs_lim(VCNs_lim<-max_ADC_voltage)= -max_ADC_voltage;
+
+VIALs_lim= VIALs_cond;
+VIALs_lim(VIALs_lim>max_ADC_voltage)= max_ADC_voltage;
+VIALs_lim(VIALs_lim<-max_ADC_voltage)= -max_ADC_voltage;
+VIBLs_lim= VIBLs_cond;
+VIBLs_lim(VIBLs_lim>max_ADC_voltage)= max_ADC_voltage;
+VIBLs_lim(VIBLs_lim<-max_ADC_voltage)= -max_ADC_voltage;
+VICLs_lim= VICLs_cond;
+VICLs_lim(VICLs_lim>max_ADC_voltage)= max_ADC_voltage;
+VICLs_lim(VICLs_lim<-max_ADC_voltage)= -max_ADC_voltage;
+
+
+% Plotting the A phase current after Clamping
+figure;
+plot(ta, VBNs_cond, ta, VBNs_lim); 
+grid;
+legend('VBNs_cond', 'VBNs_lim');
+title('Voltages inside the IED before and after the FMV');
+xlabel('Time [s]');
+ylabel('Voltage [V]');
+
+% Plotting the A phase current after clamping
+figure;
+plot(ta, VIBLs_cond, ta, VBNs_lim); 
+grid;
+legend('VIBLs_cond', 'VIBLs_lim');
 title('Current voltages inside the IED before and after FMI');
 xlabel('Time [s]');
 ylabel('Voltage [V]');
