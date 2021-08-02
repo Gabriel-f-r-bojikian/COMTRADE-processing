@@ -124,7 +124,7 @@ ylabel('Voltage [V]');
 % Simulating the filter
 pkg load signal;
 
-resolucao_bits = floor( (11+1)/3.2);
+resolucao_bits = floor(11+1/3.2);
 
 % Frequencies
 fp = 90; % Hz
@@ -134,7 +134,7 @@ wp = 2*pi*fp; % rad/s
 ws = 2*pi*fs; % rad/s
 
 % Attenuations
-Amax = 0.1 %dB
+Amax = 0.1; %dB
 Amin = 0.6*20*log10(2^resolucao_bits);
 
 % Designing the Butterworth lowpass filter
@@ -160,3 +160,39 @@ legend('VIBLs_lim', 'VIBLs_fil');
 title('Current voltages inside the IED before and after LPF');
 xlabel('Time [s]');
 ylabel('Voltage [V]');
+
+% Digitalization through the ADC
+% Decimation
+fa_final = 32*60;
+
+decim_fact = round(fa_comtrade/fa_final);
+
+samp=1;
+for ccomt = 1:decim_fact:size(VIALs_fil,1),
+  VIALs_samp(samp) = VIALs_fil(ccomt,1);
+  ta_samp(samp)    = ta(ccomt);
+  samp = samp + 1;
+endfor
+
+figure;
+plot(ta,VIALs_fil, ta_samp,VIALs_samp, 'o');
+grid;
+legend('VIA filtrado', 'VIA amostrado');
+title('Amostragem das informações');
+xlabel('Tempo [s]');
+ylabel ('Tensao [V]');
+
+
+% Quantization
+q = (max_ADC_voltage - (-max_ADC_voltage))/(2^resolucao_bits);
+
+IALs_dig = VIALs_samp / q; %Cada valor individual é quantizado no número de bits, simbolos, niveis
+% resultantes para sua representação na saída do AD
+
+figure;
+stem(IALs_dig);
+grid;
+legend('IA digitalizado');
+title('Final da digitalização');
+xlabel('amostra k');
+ylabel ('IA(k)');
