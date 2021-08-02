@@ -36,7 +36,7 @@ This project is a __work in progress__.
 - [x] File reading
 - [x] Signal pre-processing
 - [x] Internal protection
-- [ ] Analog low-pass filtering
+- [x] Analog low-pass filtering
 - [ ] ADC digitalization
 - [ ] Digital signal processing with FFT
 # How to install and run this application
