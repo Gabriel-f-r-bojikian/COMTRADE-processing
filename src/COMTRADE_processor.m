@@ -2,7 +2,7 @@ clear all;
 close all;
 clc;
 
-% Choose the name of the file to be analysed
+% Choose the name of the file to be analyzed
 filename = 'AD_GR_Rf25_F2_BCT_0';
 
 % Data input
@@ -124,9 +124,39 @@ ylabel('Voltage [V]');
 % Simulating the filter
 pkg load signal;
 
-[nf, wc] = buttord(2*pi*90, 2*pi*60*8, 0.1, 36, 's');
+resolucao_bits = floor( (11+1)/3.2);
+
+% Frequencies
+fp = 90; % Hz
+fs = 12 * fp; % Hz
+
+wp = 2*pi*fp; % rad/s
+ws = 2*pi*fs; % rad/s
+
+% Attenuations
+Amax = 0.1 %dB
+Amin = 0.6*20*log10(2^resolucao_bits);
+
+% Designing the Butterworth lowpass filter
+[nf, wc] = buttord(wp, ws, Amax, Amin, 's');
 [num, den] = butter(nf, wc, 's');
 
-% Esta funcao gera o filtro de fato
+% Generating the transfer function
 lpf = tf(num, den);
-VIALs_fil = lsim(lpf, VIALs_cond, ta);
+
+% Applying the filtering
+VANs_fil = lsim(lpf, VANs_lim, ta);
+VBNs_fil = lsim(lpf, VBNs_lim, ta);
+VCNs_fil = lsim(lpf, VCNs_lim, ta);
+VIALs_fil = lsim(lpf, VIALs_lim, ta);
+VIBLs_fil = lsim(lpf, VIBLs_lim, ta);
+VICLs_fil = lsim(lpf, VICLs_lim, ta);
+
+% Plotting the B phase voltage after filtering
+figure;
+plot(ta, VBNs_lim, ta, VBNs_fil); 
+grid;
+legend('VIBLs_lim', 'VIBLs_fil');
+title('Current voltages inside the IED before and after LPF');
+xlabel('Time [s]');
+ylabel('Voltage [V]');
