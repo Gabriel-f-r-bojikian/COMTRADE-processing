@@ -169,7 +169,13 @@ decim_fact = round(fa_comtrade/fa_final);
 
 samp=1;
 for ccomt = 1:decim_fact:size(VIALs_fil,1),
+  VANs_samp(samp) = VANs_fil(ccomt,1);
+  VBNs_samp(samp) = VBNs_fil(ccomt,1);
+  VCNs_samp(samp) = VCNs_fil(ccomt,1);
   VIALs_samp(samp) = VIALs_fil(ccomt,1);
+  VIBLs_samp(samp) = VIBLs_fil(ccomt,1);
+  VICLs_samp(samp) = VICLs_fil(ccomt,1);
+  
   ta_samp(samp)    = ta(ccomt);
   samp = samp + 1;
 endfor
