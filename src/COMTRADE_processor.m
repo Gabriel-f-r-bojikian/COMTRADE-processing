@@ -44,6 +44,35 @@ title('Secondary currents');
 xlabel('Time [s]');
 ylabel('Currents [A]');
 
+% Conditioning the signals
+FMV = 3.0/(115*sqrt(2)/sqrt(3)); % V/V
+FMI = 3.0/15; % A/V
+
+% Generate an analog signal that will be processed by the lowpass filter
+VANs_cond = VANs * FMV;
+VBNs_cond = VBNs * FMV;
+VCNs_cond = VCNs * FMV;
+% Plotting the A phase current after conditioning
+figure;
+plot(ta, VBNs, ta, VBNs_cond); 
+grid;
+legend('VBNs', 'VBNs_cond');
+title('Voltages inside the IED before and after the FMV');
+xlabel('Time [s]');
+ylabel('Voltage [V]');
+
+% Generate an analog signal that will be processed by the lowpass filter
+VIBLs_cond = IBLs * FMI;
+% Plotting the A phase current after conditioning
+figure;
+plot(ta, IBLs, ta, VIBLs_cond); 
+grid;
+legend('VIBLs_cond', 'VIBLs_fil');
+title('Current voltages inside the IED before and after FMI');
+xlabel('Time [s]');
+ylabel('Voltage [V]');
+
+
 % Simulating the filter
 pkg load signal;
 
@@ -52,15 +81,4 @@ pkg load signal;
 
 % Esta funcao gera o filtro de fato
 lpf = tf(num, den);
-
-% Generate an analog signal that will be processed by the lowpass filter
-VIALs_cond = IALs * (1/4);
 VIALs_fil = lsim(lpf, VIALs_cond, ta);
-% Plotting the A phase current after conditioning and filtering
-figure;
-plot(ta, VIALs_cond, ta, VIALs_fil); 
-grid;
-legend('VIALs_cond', 'VIALs_fil');
-title('Channel voltages inside the IED before and after the LPF');
-xlabel('Time [s]');
-ylabel('Voltage [V]');
