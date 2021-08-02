@@ -192,8 +192,13 @@ ylabel ('Tensao [V]');
 % Quantization
 q = (max_ADC_voltage - (-max_ADC_voltage))/(2^resolucao_bits);
 
+VANs_dig = VANs_samp / q;
+VBNs_dig = VBNs_samp / q;
+VCNs_dig = VCNs_samp / q;
 IALs_dig = VIALs_samp / q; %Cada valor individual é quantizado no número de bits, simbolos, niveis
 % resultantes para sua representação na saída do AD
+IBLs_dig = VIBLs_samp / q;
+ICLs_dig = VICLs_samp / q;
 
 figure;
 stem(IALs_dig);
