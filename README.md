@@ -34,7 +34,7 @@ This program consists of a script written in Octave that simulates an electrical
 This project is a __work in progress__. 
 # Features
 - [x] File reading
-- [ ] Signal pre-processing
+- [x] Signal pre-processing
 - [ ] Internal protection
 - [ ] Analog low-pass filtering
 - [ ] ADC digitalization
