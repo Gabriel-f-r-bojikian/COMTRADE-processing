@@ -6,7 +6,7 @@
 # COMTRADE processing
 
 ![Badge](https://img.shields.io/badge/license-MIT-informational?style=for-the-bade)
-![Badge](https://img.shields.io/badge/Octave-v6.2.0-0790C0?logo=Octave) ![Badge](https://img.shields.io/badge/status-in_development-red)
+![Badge](https://img.shields.io/badge/Octave-v6.2.0-0790C0?logo=Octave) ![Badge](https://img.shields.io/badge/status-complete-green)
 
 ## ❗ DISCLAIMER ❗
 
@@ -37,8 +37,8 @@ This project is a __work in progress__.
 - [x] Signal pre-processing
 - [x] Internal protection
 - [x] Analog low-pass filtering
-- [ ] ADC digitalization
-- [ ] Digital signal processing with FFT
+- [x] ADC digitalization
+- [x] Digital signal processing with FFT
 # How to install and run this application
 ## Prerequisites
 To run this code you will need the latest versions of [Octave](https://www.gnu.org/software/octave/index) and a COMTRADE file. I'm sorry that I'm not able to make any COMTRADE files available for use, but they are of sensitive nature and can only be used with authorization from their proprietors.
