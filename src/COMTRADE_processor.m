@@ -16,6 +16,49 @@ n = COMTRADE_data(:,1);
 ta = COMTRADE_data(:,2)*1E-6;
 fa_comtrade = 1/(ta(2) - ta(1));
 
+% Functions we will use for this script
+
+function firstHarmonicAvg = fourierFilter(inputSignal, windowSize)
+  
+  % Applying discreet fourier transform to see energy levels in the first harmonic
+
+  FIR_Cosseno = (sqrt(2)/windowSize)*cos(2*pi*(1:windowSize)/windowSize);
+  FIR_Seno    = (sqrt(2)/windowSize)*sin(2*pi*(1:windowSize)/windowSize);
+
+  pos = 1;
+  buffer = zeros(1,windowSize);
+  while(pos<=size(inputSignal,2))
+    bufferPosition = windowSize;
+
+    while(bufferPosition > 1)
+      buffer(bufferPosition) = buffer(bufferPosition - 1);
+      bufferPosition = bufferPosition - 1;
+    endwhile
+    buffer(1) = inputSignal(pos);
+    
+    YR = 0;
+    auxCounter = 1;
+    while(auxCounter <= windowSize)
+      YR = YR + FIR_Cosseno(auxCounter)*buffer(auxCounter);
+      auxCounter = auxCounter + 1;
+    endwhile
+
+    YI = 0;
+    auxCounter = 1;
+    while(auxCounter <= windowSize)
+      YI = YI + FIR_Seno(auxCounter)*buffer(auxCounter);
+      auxCounter = auxCounter + 1;
+    endwhile
+
+
+
+    firstHarmonicAvg(pos) = abs(YR+i*YI);
+    
+    pos = pos+1;
+        
+  endwhile
+endfunction
+
 % Separating the channels, recording them in engineering values
 VANs = COMTRADE_data(:, 3)*config(3, 6) + config(3, 7);
 VBNs = COMTRADE_data(:, 4)*config(4, 6) + config(4, 7);
@@ -211,51 +254,7 @@ title('Final da digitalização');
 xlabel('amostra k');
 ylabel ('IA(k)');
 
-% Applying discreet fourier transform to see energy levels in the first harmonic
+YMod = fourierFilter(IBLs_dig, samplesPerCycle);
 
-N = samplesPerCycle;
-
-FIR_Cosseno = (sqrt(2)/N)*cos(2*pi*(1:N)/N);
-FIR_Seno    = (sqrt(2)/N)*sin(2*pi*(1:N)/N);
-
-pos = 1;
-buffer = zeros(1,N);
-while(pos<=size(IBLs_dig,2))
-  bufferPosition = N;
-
-  while(bufferPosition > 1)
-    buffer(bufferPosition) = buffer(bufferPosition - 1);
-    bufferPosition = bufferPosition - 1;
-  endwhile
-  buffer(1) = IBLs_dig(pos);
-  
-  YR = 0;
-  auxCounter = 1;
-  while(auxCounter <= N)
-    YR = YR + FIR_Cosseno(auxCounter)*buffer(auxCounter);
-    auxCounter = auxCounter + 1;
-  endwhile
-
-  YI = 0;
-  auxCounter = 1;
-  while(auxCounter <= N)
-    YI = YI + FIR_Seno(auxCounter)*buffer(auxCounter);
-    auxCounter = auxCounter + 1;
-  endwhile
-
-
-
-  YMod(pos) = abs(YR+i*YI);
-  YArg(pos) = arg(YR+i*YI)*180/pi;
-  
-  pos = pos+1;
-       
-endwhile
-
-
-plot(ta_samp,IBLs_dig,ta_samp,YMod,'r*')
-grid
-
-figure
-plot(ta_samp,YArg,'*')
-grid
+plot(ta_samp,IBLs_dig,ta_samp,YMod,'r*');
+grid;
