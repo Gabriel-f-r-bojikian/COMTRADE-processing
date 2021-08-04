@@ -5,6 +5,10 @@ clc;
 % Choose the name of the file to be analyzed
 filename = 'AD_GR_Rf25_F2_BCT_0';
 
+% Key variables
+nominalCurrent = 1; % Ampère
+samplesPerCycle = 32;
+
 % Data input
 COMTRADE_data = csvread([filename '.dat']);
 config = csvread([filename '.cfg']);
@@ -12,6 +16,78 @@ config = csvread([filename '.cfg']);
 n = COMTRADE_data(:,1);
 ta = COMTRADE_data(:,2)*1E-6;
 fa_comtrade = 1/(ta(2) - ta(1));
+
+% Functions we will use for this script
+
+function firstHarmonicAvg = fourierFilter(inputSignal, windowSize)
+  
+  % Applying discreet fourier transform to see energy levels in the first harmonic
+
+  FIR_Cosseno = (sqrt(2)/windowSize)*cos(2*pi*(1:windowSize)/windowSize);
+  FIR_Seno    = (sqrt(2)/windowSize)*sin(2*pi*(1:windowSize)/windowSize);
+
+  pos = 1;
+  buffer = zeros(1,windowSize);
+  while(pos<=size(inputSignal,2))
+    bufferPosition = windowSize;
+
+    while(bufferPosition > 1)
+      buffer(bufferPosition) = buffer(bufferPosition - 1);
+      bufferPosition = bufferPosition - 1;
+    endwhile
+    buffer(1) = inputSignal(pos);
+    
+    YR = 0;
+    auxCounter = 1;
+    while(auxCounter <= windowSize)
+      YR = YR + FIR_Cosseno(auxCounter)*buffer(auxCounter);
+      auxCounter = auxCounter + 1;
+    endwhile
+
+    YI = 0;
+    auxCounter = 1;
+    while(auxCounter <= windowSize)
+      YI = YI + FIR_Seno(auxCounter)*buffer(auxCounter);
+      auxCounter = auxCounter + 1;
+    endwhile
+
+
+
+    firstHarmonicAvg(pos) = abs(YR+i*YI);
+    
+    pos = pos+1;
+        
+  endwhile
+endfunction
+
+function electricCurrentSpikePosition = findElectricCurrentSpike(inputSignal, nominalCurrent)
+  electricCurrentSpikePosition = Inf; % If not found, return impossible value
+  for pos = 1:size(inputSignal,2)
+    if (inputSignal(pos) > nominalCurrent)
+      electricCurrentSpikePosition = pos;
+      break;
+    endif
+  endfor
+endfunction
+
+function shutdownPosition = findShutdownPosition(inputSignal, timeoutLength)
+  epsilon = 1E-3;
+  shutdownPosition = Inf; % If not found, return impossible value
+
+  timeoutAccumulator = 0;
+  for pos = 1:size(inputSignal,2)
+    if (inputSignal(pos) < epsilon)
+      timeoutAccumulator = timeoutAccumulator + 1;
+    else
+      timeoutAccumulator = 0;
+    endif
+
+    if (timeoutAccumulator == timeoutLength)
+      shutdownPosition = pos - timeoutLength;
+      break;
+    endif
+  endfor
+endfunction
 
 % Separating the channels, recording them in engineering values
 VANs = COMTRADE_data(:, 3)*config(3, 6) + config(3, 7);
@@ -163,7 +239,7 @@ ylabel('Voltage [V]');
 
 % Digitalization through the ADC
 % Decimation
-fa_final = 32*60;
+fa_final = samplesPerCycle*60;
 
 decim_fact = round(fa_comtrade/fa_final);
 
@@ -207,3 +283,48 @@ legend('IA digitalizado');
 title('Final da digitalização');
 xlabel('amostra k');
 ylabel ('IA(k)');
+
+YModA = fourierFilter(IALs_dig, samplesPerCycle);
+YModB = fourierFilter(IBLs_dig, samplesPerCycle);
+YModC = fourierFilter(ICLs_dig, samplesPerCycle);
+
+spikePositionA = findElectricCurrentSpike(YModA, 2.5*nominalCurrent*FMI/q);
+spikePositionB = findElectricCurrentSpike(YModB, 2.5*nominalCurrent*FMI/q);
+spikePositionC = findElectricCurrentSpike(YModC, 2.5*nominalCurrent*FMI/q);
+
+currentShutdownPositionA = findShutdownPosition(IALs_dig, samplesPerCycle);
+currentShutdownPositionB = findShutdownPosition(IBLs_dig, samplesPerCycle);
+currentShutdownPositionC = findShutdownPosition(ICLs_dig, samplesPerCycle);
+
+voltageShutdownPositionA = findShutdownPosition(VANs_dig, samplesPerCycle);
+voltageShutdownPositionB = findShutdownPosition(VBNs_dig, samplesPerCycle);
+voltageShutdownPositionC = findShutdownPosition(VCNs_dig, samplesPerCycle);
+
+shortCircuitInstant = ta_samp(min([spikePositionA, spikePositionB, spikePositionC]))
+currentShutdownInstant = ta_samp(min([currentShutdownPositionA, currentShutdownPositionB, currentShutdownPositionC]))
+voltageShutdownInstant = ta_samp(min([voltageShutdownPositionA, voltageShutdownPositionB, voltageShutdownPositionC]))
+
+
+figure;
+plot(ta_samp,IALs_dig,ta_samp,YModA,'r*');
+legend('IALs_dig', 'Valor eficaz');
+title('Amostragem das informações - Fase A');
+xlabel('Tempo [s]');
+ylabel ('Tensao [V]');
+grid;
+
+figure;
+plot(ta_samp,IBLs_dig,ta_samp,YModB,'g*');
+legend('IBLs_dig', 'Valor eficaz');
+title('Amostragem das informações - Fase B');
+xlabel('Tempo [s]');
+ylabel ('Tensao [V]');
+grid;
+
+figure;
+plot(ta_samp,ICLs_dig,ta_samp,YModC,'b*');
+legend('ICLs_dig', 'Valor eficaz');
+title('Amostragem das informações - Fase C');
+xlabel('Tempo [s]');
+ylabel ('Tensao [V]');
+grid;
