@@ -5,6 +5,9 @@ clc;
 % Choose the name of the file to be analyzed
 filename = 'AD_GR_Rf25_F2_BCT_0';
 
+% Key variables
+samplesPerCycle = 32;
+
 % Data input
 COMTRADE_data = csvread([filename '.dat']);
 config = csvread([filename '.cfg']);
@@ -163,7 +166,7 @@ ylabel('Voltage [V]');
 
 % Digitalization through the ADC
 % Decimation
-fa_final = 32*60;
+fa_final = samplesPerCycle*60;
 
 decim_fact = round(fa_comtrade/fa_final);
 
@@ -207,3 +210,52 @@ legend('IA digitalizado');
 title('Final da digitalização');
 xlabel('amostra k');
 ylabel ('IA(k)');
+
+% Applying discreet fourier transform to see energy levels in the first harmonic
+
+N = samplesPerCycle;
+
+FIR_Cosseno = (sqrt(2)/N)*cos(2*pi*(1:N)/N);
+FIR_Seno    = (sqrt(2)/N)*sin(2*pi*(1:N)/N);
+
+pos = 1;
+buffer = zeros(1,N);
+while(pos<=size(IBLs_dig,2))
+  bufferPosition = N;
+
+  while(bufferPosition > 1)
+    buffer(bufferPosition) = buffer(bufferPosition - 1);
+    bufferPosition = bufferPosition - 1;
+  endwhile
+  buffer(1) = IBLs_dig(pos);
+  
+  YR = 0;
+  auxCounter = 1;
+  while(auxCounter <= N)
+    YR = YR + FIR_Cosseno(auxCounter)*buffer(auxCounter);
+    auxCounter = auxCounter + 1;
+  endwhile
+
+  YI = 0;
+  auxCounter = 1;
+  while(auxCounter <= N)
+    YI = YI + FIR_Seno(auxCounter)*buffer(auxCounter);
+    auxCounter = auxCounter + 1;
+  endwhile
+
+
+
+  YMod(pos) = abs(YR+i*YI);
+  YArg(pos) = arg(YR+i*YI)*180/pi;
+  
+  pos = pos+1;
+       
+endwhile
+
+
+plot(ta_samp,IBLs_dig,ta_samp,YMod,'r*')
+grid
+
+figure
+plot(ta_samp,YArg,'*')
+grid
