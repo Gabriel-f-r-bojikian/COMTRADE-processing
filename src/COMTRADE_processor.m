@@ -6,6 +6,7 @@ clc;
 filename = 'AD_GR_Rf25_F2_BCT_0';
 
 % Key variables
+nominalCurrent = 1; % Ampère
 samplesPerCycle = 32;
 
 % Data input
@@ -57,6 +58,35 @@ function firstHarmonicAvg = fourierFilter(inputSignal, windowSize)
     pos = pos+1;
         
   endwhile
+endfunction
+
+function electricCurrentSpikePosition = findElectricCurrentSpike(inputSignal, nominalCurrent)
+  electricCurrentSpikePosition = Inf; % If not found, return impossible value
+  for pos = 1:size(inputSignal,2)
+    if (inputSignal(pos) > nominalCurrent)
+      electricCurrentSpikePosition = pos;
+      break;
+    endif
+  endfor
+endfunction
+
+function shutdownPosition = findShutdownPosition(inputSignal, timeoutLength)
+  epsilon = 1E-3;
+  shutdownPosition = Inf; % If not found, return impossible value
+
+  timeoutAccumulator = 0;
+  for pos = 1:size(inputSignal,2)
+    if (inputSignal(pos) < epsilon)
+      timeoutAccumulator = timeoutAccumulator + 1;
+    else
+      timeoutAccumulator = 0;
+    endif
+
+    if (timeoutAccumulator == timeoutLength)
+      shutdownPosition = pos - timeoutLength;
+      break;
+    endif
+  endfor
 endfunction
 
 % Separating the channels, recording them in engineering values
@@ -254,7 +284,47 @@ title('Final da digitalização');
 xlabel('amostra k');
 ylabel ('IA(k)');
 
-YMod = fourierFilter(IBLs_dig, samplesPerCycle);
+YModA = fourierFilter(IALs_dig, samplesPerCycle);
+YModB = fourierFilter(IBLs_dig, samplesPerCycle);
+YModC = fourierFilter(ICLs_dig, samplesPerCycle);
 
-plot(ta_samp,IBLs_dig,ta_samp,YMod,'r*');
+spikePositionA = findElectricCurrentSpike(YModA, 2.5*nominalCurrent*FMI/q);
+spikePositionB = findElectricCurrentSpike(YModB, 2.5*nominalCurrent*FMI/q);
+spikePositionC = findElectricCurrentSpike(YModC, 2.5*nominalCurrent*FMI/q);
+
+currentShutdownPositionA = findShutdownPosition(IALs_dig, samplesPerCycle);
+currentShutdownPositionB = findShutdownPosition(IBLs_dig, samplesPerCycle);
+currentShutdownPositionC = findShutdownPosition(ICLs_dig, samplesPerCycle);
+
+voltageShutdownPositionA = findShutdownPosition(VANs_dig, samplesPerCycle);
+voltageShutdownPositionB = findShutdownPosition(VBNs_dig, samplesPerCycle);
+voltageShutdownPositionC = findShutdownPosition(VCNs_dig, samplesPerCycle);
+
+shortCircuitInstant = ta_samp(min([spikePositionA, spikePositionB, spikePositionC]))
+currentShutdownInstant = ta_samp(min([currentShutdownPositionA, currentShutdownPositionB, currentShutdownPositionC]))
+voltageShutdownInstant = ta_samp(min([voltageShutdownPositionA, voltageShutdownPositionB, voltageShutdownPositionC]))
+
+
+figure;
+plot(ta_samp,IALs_dig,ta_samp,YModA,'r*');
+legend('IALs_dig', 'Valor eficaz');
+title('Amostragem das informações - Fase A');
+xlabel('Tempo [s]');
+ylabel ('Tensao [V]');
+grid;
+
+figure;
+plot(ta_samp,IBLs_dig,ta_samp,YModB,'g*');
+legend('IBLs_dig', 'Valor eficaz');
+title('Amostragem das informações - Fase B');
+xlabel('Tempo [s]');
+ylabel ('Tensao [V]');
+grid;
+
+figure;
+plot(ta_samp,ICLs_dig,ta_samp,YModC,'b*');
+legend('ICLs_dig', 'Valor eficaz');
+title('Amostragem das informações - Fase C');
+xlabel('Tempo [s]');
+ylabel ('Tensao [V]');
 grid;
