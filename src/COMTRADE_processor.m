@@ -183,16 +183,16 @@ figure;
 plot(ta, VBNs_cond, ta, VBNs_lim); 
 grid;
 legend('VBNs_cond', 'VBNs_lim');
-title('Voltages inside the IED before and after the FMV');
+title('Clamped voltages inside the IED');
 xlabel('Time [s]');
 ylabel('Voltage [V]');
 
 % Plotting the A phase current after clamping
 figure;
-plot(ta, VIBLs_cond, ta, VBNs_lim); 
+plot(ta, VIBLs_cond, ta, VIBLs_lim); 
 grid;
 legend('VIBLs_cond', 'VIBLs_lim');
-title('Current voltages inside the IED before and after FMI');
+title('Clamped Current voltages inside the IED');
 xlabel('Time [s]');
 ylabel('Voltage [V]');
 
@@ -230,7 +230,7 @@ VICLs_fil = lsim(lpf, VICLs_lim, ta);
 
 % Plotting the B phase voltage after filtering
 figure;
-plot(ta, VBNs_lim, ta, VBNs_fil); 
+plot(ta, VIBLs_lim, ta, VIBLs_fil); 
 grid;
 legend('VIBLs_lim', 'VIBLs_fil');
 title('Current voltages inside the IED before and after LPF');
@@ -257,9 +257,9 @@ for ccomt = 1:decim_fact:size(VIALs_fil,1),
 endfor
 
 figure;
-plot(ta,VIALs_fil, ta_samp,VIALs_samp, 'o');
+plot(ta,VIBLs_fil, ta_samp,VIBLs_samp, 'o');
 grid;
-legend('VIA filtrado', 'VIA amostrado');
+legend('VIB filtrado', 'VIB amostrado');
 title('Amostragem das informações');
 xlabel('Tempo [s]');
 ylabel ('Tensao [V]');
@@ -277,12 +277,12 @@ IBLs_dig = VIBLs_samp / q;
 ICLs_dig = VICLs_samp / q;
 
 figure;
-stem(IALs_dig);
+stem(IBLs_dig);
 grid;
-legend('IA digitalizado');
+legend('IB digitalizado');
 title('Final da digitalização');
 xlabel('amostra k');
-ylabel ('IA(k)');
+ylabel ('IB(k)');
 
 YModA = fourierFilter(IALs_dig, samplesPerCycle);
 YModB = fourierFilter(IBLs_dig, samplesPerCycle);
